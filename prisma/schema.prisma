@@ -29,7 +29,7 @@ model Event {
   description       String
   capacity          Int
   categoryId        String
-  status            String?
+  status            String? @default("Ativo")
   startDate         DateTime
   endDate           DateTime
   salesStartDate    DateTime?

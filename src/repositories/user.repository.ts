@@ -56,6 +56,9 @@ class UserRepositoryPrisma implements UserRepository {
 						id: true,
 						eventId: true,
 						status: true,
+						totalPrice:true,
+						createdAt:true,
+						quantityTickets:true,
 						tickets: {
 							select: {
 								id: true,
@@ -90,6 +93,7 @@ class UserRepositoryPrisma implements UserRepository {
 						description: true,
 						startDate: true,
 						endDate: true,
+						status:true,
 						assets: {
 							select: {
 								id: true,

@@ -166,6 +166,7 @@ class EventRepositoryPrisma implements EventRepository {
 					description:true,
 					endDate:true,
 					format:true,
+					status:true,
                     assets: {
                         select: {
                             id: true,
@@ -194,6 +195,7 @@ class EventRepositoryPrisma implements EventRepository {
                     title: true,
                     addressId: true,
                     startDate: true,
+					Address:true,
                     assets: {
                         select: {
                             id: true,
