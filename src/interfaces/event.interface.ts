@@ -106,6 +106,7 @@ export interface RecentEvents {
 	id: string;
 	title: string;
 	addressId: string;
+	Address:Address;
 	startDate: Date;
 	assets: {
 		id: string;
