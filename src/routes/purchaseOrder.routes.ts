@@ -12,17 +12,9 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 	createQueues();
 	const purchaseOrderUseCase = new PurchaseOrderUseCase();
 	fastify.post<{ Body: PurchaseOrderReserved }>("/", {
-		preHandler: [],
+		preHandler: [jwtValidator],
 		handler: async (req, reply) => {
-			const user = {
-				id: "614fd3f4-042d-4bcb-9787-2e5e742e38a0",
-				externalId: "12345",
-				firstName: "John",
-				lastName: "Doe",
-				email: "johndoe@example.com",
-				phone: "1234567890",
-				cpf: "123.456.789-00",
-			};
+			const user = req.user as User
 			try {
 				const queue = getQueue("purchaseOrder");
 				console.log("Adding job to queue:", req.body);
@@ -45,7 +37,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 		"/reserved/:id",
 		{
 			preHandler: [
-				/* jwtValidator */
+				jwtValidator
 			],
 		},
 		async (req, reply) => {
@@ -73,19 +65,11 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 		"/reserved/:id",
 		{
 			preHandler: [
-				/* jwtValidator */
+				jwtValidator
 			],
 		},
 		async (req, reply) => {
-			const user = {
-				id: "614fd3f4-042d-4bcb-9787-2e5e742e38a0",
-				externalId: "12345",
-				firstName: "John",
-				lastName: "Doe",
-				email: "johndoe@example.com",
-				phone: "1234567890",
-				cpf: "123.456.789-00",
-			};
+			const user = req.user as User
 			const { id } = req.params;
 			const { eventId, ticketTypes } = req.body;
 			try {
