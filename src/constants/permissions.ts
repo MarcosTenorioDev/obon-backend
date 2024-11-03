@@ -26,6 +26,10 @@ const permissions: Record<string, RoutePermissions> = {
 	"/purchaseorders":{
 		POST:["admin", "user"]
 	},
+	"/purchaseorders/reserved/:id":{
+		GET: ["admin", "user"],
+		PUT:["admin", "user"]
+	},
 	"/producers":{
 		GET:["admin", "user"],
 		POST:["admin", "user"]
