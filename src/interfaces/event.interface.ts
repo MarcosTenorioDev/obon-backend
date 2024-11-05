@@ -48,6 +48,14 @@ export interface EventCreate {
 	additionalDetails: string;
 	creatorId: string;
 	addressId: string;
+	ticketTypes: {
+		description: string;
+		price: number;
+		quantity: number;
+		salesStartDate: Date;
+		salesEndDate: Date;
+		isActive: boolean;
+	}[];
 }
 
 export interface EventById {
@@ -106,7 +114,7 @@ export interface RecentEvents {
 	id: string;
 	title: string;
 	addressId: string;
-	Address:Address;
+	Address: Address;
 	startDate: Date;
 	assets: {
 		id: string;
@@ -118,7 +126,7 @@ export interface RecentEvents {
 
 export interface EventValidate {
 	id: string;
-	creatorId:string
+	creatorId: string;
 }
 
 export interface EventRepository {
@@ -127,5 +135,5 @@ export interface EventRepository {
 	getEventById(id: string): Promise<EventById>;
 	getEventsByCreatorId(creatorId: string): Promise<EventPreview[]>;
 	getRecentEvents(): Promise<RecentEvents[]>;
-	getEventToValidate(id:string): Promise<EventValidate>;
+	getEventToValidate(id: string): Promise<EventValidate>;
 }

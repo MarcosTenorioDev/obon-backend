@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../database/prisma-client";
 import {
 	Event,
@@ -8,26 +9,46 @@ import {
 	EventValidate,
 	RecentEvents,
 } from "../interfaces/event.interface";
-import { Prisma } from "@prisma/client";
 class EventRepositoryPrisma implements EventRepository {
 	async create(data: EventCreate): Promise<Event> {
 		try {
-			return await prisma.event.create({
-				data: {
-					title: data.title,
-					description: data.description,
-					addressId: data.addressId,
-					capacity: data.capacity,
-					categoryId: data.categoryId,
-					startDate: data.startDate,
-					endDate: data.endDate,
-					maxTicketsPerUser:data.maxTicketsPerUser,
-					format: data.format,
-					ageRating: data.ageRating,
-					additionalDetails: data.additionalDetails,
-					creatorId: data.creatorId,
-					producerId: data.producerId,
-				},
+			return await prisma.$transaction(async (prisma) => {
+				const event = await prisma.event.create({
+					data: {
+						title: data.title,
+						description: data.description,
+						addressId: data.addressId,
+						capacity: data.capacity,
+						categoryId: data.categoryId,
+						startDate: data.startDate,
+						endDate: data.endDate,
+						maxTicketsPerUser: data.maxTicketsPerUser,
+						format: data.format,
+						ageRating: data.ageRating,
+						additionalDetails: data.additionalDetails,
+						creatorId: data.creatorId,
+						producerId: data.producerId,
+					},
+				});
+
+				const ticketTypes = await prisma.ticketType.createMany({
+					data: data.ticketTypes.map((ticketType) => {
+						return {
+							eventId: event.id,
+							description: ticketType.description,
+							price: ticketType.price,
+							quantity: ticketType.quantity,
+							salesStartDate: ticketType.salesEndDate,
+							salesEndDate: ticketType.salesEndDate,
+							isActive: ticketType.isActive,
+						};
+					}),
+				});
+
+				return {
+					...event,
+					tickeTypes: ticketTypes,
+				};
 			});
 		} catch (error) {
 			if ((error as Prisma.PrismaClientKnownRequestError).code === "P2002") {
@@ -86,7 +107,7 @@ class EventRepositoryPrisma implements EventRepository {
 							id: true,
 							description: true,
 							price: true,
-                            quantity:true,
+							quantity: true,
 							salesStartDate: true,
 							salesEndDate: true,
 							isActive: true,
@@ -130,17 +151,19 @@ class EventRepositoryPrisma implements EventRepository {
 					},
 				},
 			});
-			
+
 			// Caso a quantidade de tickets por usuário for menor do que o total disponível, vamos retornar a quantidade de tickets por usuário.
-			const ticketTypesAvailable = event.ticketTypes.map(({quantity, ...ticket}) => {
-				return {
-					...ticket,
-					quantityAvailablePerUser:
-						event.maxTicketsPerUser < quantity
-							? event.maxTicketsPerUser
-							: quantity,
-				};
-			});
+			const ticketTypesAvailable = event.ticketTypes.map(
+				({ quantity, ...ticket }) => {
+					return {
+						...ticket,
+						quantityAvailablePerUser:
+							event.maxTicketsPerUser < quantity
+								? event.maxTicketsPerUser
+								: quantity,
+					};
+				}
+			);
 
 			// Retornamos o evento com os ticketTypes modificados
 			return {
@@ -154,76 +177,75 @@ class EventRepositoryPrisma implements EventRepository {
 
 	async getEventsByCreatorId(creatorId: string): Promise<EventPreview[]> {
 		try {
-            return await prisma.event.findMany({
-                where: {
-                    creatorId
-                },
-                select: {
-                    id: true,
-                    title: true,
-                    addressId: true,
-                    startDate: true,
-					description:true,
-					endDate:true,
-					format:true,
-					status:true,
-                    assets: {
-                        select: {
-                            id: true,
-                            url: true,
-                            type: true,
-                            description: true
-                        }
-                    },
-					Address:true
-                }
-            });
-        } catch (error) {
-            throw new Error('Unable to get events by creator id');
-        }
+			return await prisma.event.findMany({
+				where: {
+					creatorId,
+				},
+				select: {
+					id: true,
+					title: true,
+					addressId: true,
+					startDate: true,
+					description: true,
+					endDate: true,
+					format: true,
+					status: true,
+					assets: {
+						select: {
+							id: true,
+							url: true,
+							type: true,
+							description: true,
+						},
+					},
+					Address: true,
+				},
+			});
+		} catch (error) {
+			throw new Error("Unable to get events by creator id");
+		}
 	}
 
 	async getRecentEvents(): Promise<RecentEvents[]> {
-		  try {
-            return await prisma.event.findMany({
-                take: 10,
-                orderBy: {
-                    startDate: 'desc'
-                },
-                select: {
-                    id: true,
-                    title: true,
-                    addressId: true,
-                    startDate: true,
-					Address:true,
-                    assets: {
-                        select: {
-                            id: true,
-                            url: true,
-                            type: true,
-                            description: true
-                        }
-                    }
-                }
-            });
-        } catch (error) {
-            throw new Error('Unable to get recent events');
-        }
+		try {
+			return await prisma.event.findMany({
+				take: 10,
+				orderBy: {
+					startDate: "desc",
+				},
+				select: {
+					id: true,
+					title: true,
+					addressId: true,
+					startDate: true,
+					Address: true,
+					assets: {
+						select: {
+							id: true,
+							url: true,
+							type: true,
+							description: true,
+						},
+					},
+				},
+			});
+		} catch (error) {
+			throw new Error("Unable to get recent events");
+		}
 	}
 
-	async getEventToValidate(id:string): Promise <EventValidate>{
-		try{
+	async getEventToValidate(id: string): Promise<EventValidate> {
+		try {
 			return prisma.event.findFirstOrThrow({
-				where:{
-					id
+				where: {
+					id,
 				},
-				select:{
-					id:true,
-					creatorId:true
-				}
-			})
-
-		}catch (error) {
+				select: {
+					id: true,
+					creatorId: true,
+				},
+			});
+		} catch (error) {
 			throw new Error("Unable to get event by id");
 		}
 	}
