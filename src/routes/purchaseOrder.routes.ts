@@ -3,9 +3,9 @@ import {
 	PurchaseOrderReserved,
 	TicketTypeQuantity,
 } from "../interfaces/purchaseOrder.interface";
+import { User } from "../interfaces/user.interface";
 import { createQueues, getQueue } from "../lib/queue.lib";
 import { jwtValidator } from "../middlewares/auth.middleware";
-import { User } from "../interfaces/user.interface";
 import { PurchaseOrderUseCase } from "../usecases/purchaseOrder.usecase";
 
 export async function purchaseOrderRoutes(fastify: FastifyInstance) {
@@ -14,7 +14,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 	fastify.post<{ Body: PurchaseOrderReserved }>("/", {
 		preHandler: [jwtValidator],
 		handler: async (req, reply) => {
-			const user = req.user as User
+			const user = req.user as User;
 			try {
 				const queue = getQueue("purchaseOrder");
 				console.log("Adding job to queue:", req.body);
@@ -36,9 +36,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 	fastify.get<{ Params: { id: string } }>(
 		"/reserved/:id",
 		{
-			preHandler: [
-				jwtValidator
-			],
+			preHandler: [jwtValidator],
 		},
 		async (req, reply) => {
 			const user = req.user as User;
@@ -64,12 +62,10 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 	}>(
 		"/reserved/:id",
 		{
-			preHandler: [
-				jwtValidator
-			],
+			preHandler: [jwtValidator],
 		},
 		async (req, reply) => {
-			const user = req.user as User
+			const user = req.user as User;
 			const { id } = req.params;
 			const { eventId, ticketTypes } = req.body;
 			try {
@@ -79,6 +75,33 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 					ticketTypes,
 					user,
 				});
+				reply.code(200).send(data);
+			} catch (error) {
+				console.error(error);
+				reply.code(400).send({
+					error:
+						error instanceof Error
+							? error.message
+							: "An unknown error occurred",
+				});
+			}
+		}
+	);
+
+	fastify.get<{ Params: { eventId: string } }>(
+		"/user/event/:eventId",
+		{
+			preHandler: [jwtValidator],
+		},
+		async (req, reply) => {
+			const user = req.user as User;
+			const { eventId } = req.params;
+			try {
+				const data =
+					await purchaseOrderUseCase.findPurchaseOrdersByUserAndEventId(
+						eventId,
+						user.id
+					);
 				reply.code(200).send(data);
 			} catch (error) {
 				console.error(error);

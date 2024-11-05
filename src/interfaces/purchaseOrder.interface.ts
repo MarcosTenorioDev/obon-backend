@@ -40,7 +40,7 @@ export interface ReservedPurchaseOrderCreate {
 }
 
 export interface ReservedPurchaseOrderUpdate {
-	id:string
+	id: string;
 	eventId: string;
 	ticketTypes: TicketTypeQuantity[];
 	user: User;
@@ -88,10 +88,10 @@ export interface PurchaseOrderReserved {
 		ticketTypeId: string;
 		purchaseOrderId: string;
 		quantity: number;
-		ticketType:{
-			description:string,
-			price:number
-		}
+		ticketType: {
+			description: string;
+			price: number;
+		};
 	}[];
 	event: {
 		Address: Address;
@@ -100,21 +100,27 @@ export interface PurchaseOrderReserved {
 		startDate: Date;
 		endDate: Date;
 		title: string;
-		ageRating:number;
-		assets: Asset[]
+		ageRating: number;
+		assets: Asset[];
 	};
 }
 
 export interface PurchaseOrderRepository {
 	create(
 		data: ReservedPurchaseOrderCreate,
-		reservedTickets: {ticketTypeId:string, quantityReserved:number}[]
+		reservedTickets: { ticketTypeId: string; quantityReserved: number }[]
 	): Promise<PurchaseOrder | undefined>;
 	findPurchaseOrdersByUserAndEventId(
 		id: string,
 		eventId: string
 	): Promise<PurchaseOrderInfo[]>;
 	findReservedById(id: string, user: User): Promise<PurchaseOrderReserved>;
-	reservePurchaseOrder(data:ReservedPurchaseOrderUpdate):Promise<PurchaseOrder>;
-	verifyIfHasPurchased(data:{purchaseOrderId:string}):void;
+	reservePurchaseOrder(
+		data: ReservedPurchaseOrderUpdate
+	): Promise<PurchaseOrder>;
+	verifyIfHasPurchased(data: { purchaseOrderId: string }): void;
+	findTicketQuantityPurchasedByUserAndEventId(
+		id: string,
+		eventId: string
+	): Promise<{ ticketsPurchased: number }>;
 }

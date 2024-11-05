@@ -1,3 +1,4 @@
+import { EventRepository } from "../interfaces/event.interface";
 import {
 	PurchaseOrder,
 	PurchaseOrderRepository,
@@ -5,11 +6,10 @@ import {
 	ReservedPurchaseOrderUpdate,
 } from "../interfaces/purchaseOrder.interface";
 import { TicketTypeRepository } from "../interfaces/ticketType.interface";
+import { User } from "../interfaces/user.interface";
+import { EventRepositoryPrisma } from "../repositories/event.repository";
 import { PurchaseOrderRepositoryPrisma } from "../repositories/purchaseOrder.repository";
 import { TicketTypeRepositoryPrisma } from "../repositories/ticketType.repository";
-import { EventRepository } from "../interfaces/event.interface";
-import { EventRepositoryPrisma } from "../repositories/event.repository";
-import { User } from "../interfaces/user.interface";
 
 class PurchaseOrderUseCase {
 	private purchaseOrderRepository: PurchaseOrderRepository;
@@ -159,10 +159,19 @@ class PurchaseOrderUseCase {
 		return await this.purchaseOrderRepository.reservePurchaseOrder(data);
 	}
 
-	verifyIfHasPurchased(data:{purchaseOrderId:string}){
-		this.purchaseOrderRepository.verifyIfHasPurchased(data)
+	verifyIfHasPurchased(data: { purchaseOrderId: string }) {
+		this.purchaseOrderRepository.verifyIfHasPurchased(data);
 	}
-	
+
+	async findPurchaseOrdersByUserAndEventId(
+		eventId: string,
+		userId: string
+	): Promise<{ ticketsPurchased: number }> {
+		return await this.purchaseOrderRepository.findTicketQuantityPurchasedByUserAndEventId(
+			userId,
+			eventId
+		);
+	}
 }
 
 export { PurchaseOrderUseCase };

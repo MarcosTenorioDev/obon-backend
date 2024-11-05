@@ -7,45 +7,48 @@ type RoutePermissions = {
 };
 
 const permissions: Record<string, RoutePermissions> = {
-	"/events":{
-		POST:["admin", "user"]
+	"/events": {
+		POST: ["admin", "user"],
 	},
-	"/events/created":{
-		GET:["admin", "user"]
-	},
-	"/ticketType":{
-		POST:["admin", "user"]
-	},
-	"/users":{
-		GET:["admin","user"],
-		PATCH:["admin","user"]
-	},
-	"/users/events":{
-		GET:["admin","user"]
-	},
-	"/purchaseorders":{
-		POST:["admin", "user"]
-	},
-	"/purchaseorders/reserved/:id":{
+	"/events/created": {
 		GET: ["admin", "user"],
-		PUT:["admin", "user"]
 	},
-	"/producers":{
-		GET:["admin", "user"],
-		POST:["admin", "user"]
+	"/ticketType": {
+		POST: ["admin", "user"],
 	},
-	"/event/categories":{
-		POST:["admin"]
+	"/users": {
+		GET: ["admin", "user"],
+		PATCH: ["admin", "user"],
 	},
-	"/assets/upload":{
-		POST:["admin", "user"]
+	"/users/events": {
+		GET: ["admin", "user"],
 	},
-	"/assets/upload/:filename":{
-		DELETE:["admin", "user"]
+	"/purchaseorders": {
+		POST: ["admin", "user"],
 	},
-	"/address":{
-		POST: ["admin", "user"]
-	}
+	"/purchaseorders/user/event/:eventId": {
+		GET: ["admin", "user"],
+	},
+	"/purchaseorders/reserved/:id": {
+		GET: ["admin", "user"],
+		PUT: ["admin", "user"],
+	},
+	"/producers": {
+		GET: ["admin", "user"],
+		POST: ["admin", "user"],
+	},
+	"/event/categories": {
+		POST: ["admin"],
+	},
+	"/assets/upload": {
+		POST: ["admin", "user"],
+	},
+	"/assets/upload/:filename": {
+		DELETE: ["admin", "user"],
+	},
+	"/address": {
+		POST: ["admin", "user"],
+	},
 };
 
 export function checkPermissions(

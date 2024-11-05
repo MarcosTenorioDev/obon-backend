@@ -1,6 +1,5 @@
 import { prisma } from "../database/prisma-client";
 import {
-	PurchaseOrder,
 	PurchaseOrderAndTicketsCreate,
 	PurchaseOrderInfo,
 	PurchaseOrderRepository,
@@ -10,6 +9,12 @@ import {
 import { User } from "../interfaces/user.interface";
 
 class PurchaseOrderRepositoryPrisma implements PurchaseOrderRepository {
+	findTicketPurchasedByUserAndEventId(
+		id: string,
+		eventId: string
+	): Promise<{ ticketsPurchased: number }[]> {
+		throw new Error("Method not implemented.");
+	}
 	async create(
 		data: PurchaseOrderAndTicketsCreate,
 		requestedTickets: { quantityReserved: number; ticketTypeId: string }[]
@@ -110,6 +115,39 @@ class PurchaseOrderRepositoryPrisma implements PurchaseOrderRepository {
 			});
 
 			return purchaseOrders;
+		} catch (error) {
+			console.error("Error finding events by external ID:", error);
+			throw error;
+		}
+	}
+
+	async findTicketQuantityPurchasedByUserAndEventId(
+		id: string,
+		eventId: string
+	): Promise<{ ticketsPurchased: number }> {
+		try {
+			const purchaseOrders = await prisma.purchaseOrder.findMany({
+				where: { userId: id, eventId: eventId },
+				select: {
+					tickets: {
+						select: {
+							id: true,
+						},
+					},
+				},
+			});
+
+			const ticketsAux = purchaseOrders.map((purchaseOrder) => {
+				return purchaseOrder.tickets.length;
+			});
+
+			const response = {
+				ticketsPurchased: ticketsAux.reduce((acc, curr) => {
+					return acc + curr;
+				}, 0),
+			};
+
+			return response;
 		} catch (error) {
 			console.error("Error finding events by external ID:", error);
 			throw error;
