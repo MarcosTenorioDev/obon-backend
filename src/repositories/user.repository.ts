@@ -1,5 +1,10 @@
 import { prisma } from "../database/prisma-client";
-import { User, UserCreate, UserRepository, UserUpdate } from "../interfaces/user.interface";
+import {
+	User,
+	UserCreate,
+	UserRepository,
+	UserUpdate,
+} from "../interfaces/user.interface";
 
 class UserRepositoryPrisma implements UserRepository {
 	async create(data: UserCreate): Promise<User> {
@@ -9,7 +14,7 @@ class UserRepositoryPrisma implements UserRepository {
 					externalId: data.externalId,
 					firstName: data.firstName,
 					lastName: data.lastName,
-					email: data.email
+					email: data.email,
 				},
 			});
 		} catch (error) {
@@ -51,14 +56,14 @@ class UserRepositoryPrisma implements UserRepository {
 		try {
 			return await prisma.$transaction(async (prisma) => {
 				const purchaseOrders = await prisma.purchaseOrder.findMany({
-					where: { userId: id },
+					where: { userId: id, status: "active" },
 					select: {
 						id: true,
 						eventId: true,
 						status: true,
-						totalPrice:true,
-						createdAt:true,
-						quantityTickets:true,
+						totalPrice: true,
+						createdAt: true,
+						quantityTickets: true,
 						tickets: {
 							select: {
 								id: true,
@@ -93,7 +98,7 @@ class UserRepositoryPrisma implements UserRepository {
 						description: true,
 						startDate: true,
 						endDate: true,
-						status:true,
+						status: true,
 						assets: {
 							select: {
 								id: true,
