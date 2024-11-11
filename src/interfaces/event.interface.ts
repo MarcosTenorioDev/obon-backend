@@ -1,4 +1,6 @@
 import { Address } from "./address.interface";
+import { TicketType } from "./ticketType.interface";
+import { User } from "./user.interface";
 
 export interface Event {
 	id: string;
@@ -129,6 +131,40 @@ export interface EventValidate {
 	creatorId: string;
 }
 
+export interface IEventDetails {
+	id: string;
+	title: string;
+	description: string;
+	capacity: number;
+	categoryId: string;
+	startDate: Date;
+	endDate: Date;
+	status: string | null;
+	format: string;
+	ageRating: number;
+	maxTicketsPerUser: number;
+	additionalDetails: string;
+	producerId: string;
+	addressId: string;
+	ticketTypes: TicketType[];
+}
+
+export interface IEventEditPayload {
+	title: string;
+	description: string;
+	capacity: number;
+	categoryId: string;
+	startDate: Date;
+	endDate: Date;
+	status: string;
+	format: string;
+	ageRating: number;
+	maxTicketsPerUser: number;
+	additionalDetails: string;
+	producerId: string;
+	addressId: string;
+}
+
 export interface EventRepository {
 	create(data: EventCreate): Promise<Event>;
 	getEventsByCategory(categoryId: string): Promise<EventPreview[]>;
@@ -136,4 +172,10 @@ export interface EventRepository {
 	getEventsByCreatorId(creatorId: string): Promise<EventPreview[]>;
 	getRecentEvents(): Promise<RecentEvents[]>;
 	getEventToValidate(id: string): Promise<EventValidate>;
+	getEventDetailsById(data: { id: string; user: User }): Promise<IEventDetails>;
+	update(data: {
+		payload: IEventEditPayload;
+		id: string;
+		user: User;
+	}): Promise<IEventDetails>;
 }

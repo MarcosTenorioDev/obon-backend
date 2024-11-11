@@ -1,10 +1,11 @@
 import { FastifyInstance } from "fastify";
 import multer from "fastify-multer";
+import { AssetCreate } from "../interfaces/asset.interface";
+import { User } from "../interfaces/user.interface";
 import multerLib from "../lib/multer.lib";
+import { jwtValidator } from "../middlewares/auth.middleware";
 import { AssetRepositoryPrisma } from "../repositories/asset.repository";
 import { UploadAssetUseCase } from "../usecases/asset.usecase";
-import { AssetCreate } from "../interfaces/asset.interface";
-import { jwtValidator } from "../middlewares/auth.middleware";
 
 const assetRepository = new AssetRepositoryPrisma();
 const uploadAssetUseCase = new UploadAssetUseCase(assetRepository);
@@ -25,6 +26,7 @@ function uploadAssetS3Route(fastify: FastifyInstance) {
 		async (req, reply) => {
 			const { file } = req as any;
 			const { eventId, type, description } = req.body;
+			const user = req.user as User;
 
 			try {
 				if (!file) {
@@ -38,7 +40,7 @@ function uploadAssetS3Route(fastify: FastifyInstance) {
 					description: description || null,
 				};
 
-				const data = await uploadAssetUseCase.execute(file, assetData);
+				const data = await uploadAssetUseCase.execute(file, assetData, user);
 				reply.code(201).send(data);
 			} catch (error) {
 				console.error(error);

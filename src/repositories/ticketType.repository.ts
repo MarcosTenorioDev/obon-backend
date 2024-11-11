@@ -4,7 +4,9 @@ import {
 	TicketType,
 	TicketTypeCreate,
 	TicketTypeRepository,
+	TicketTypeUpdate,
 } from "../interfaces/ticketType.interface";
+import { User } from "../interfaces/user.interface";
 
 class TicketTypeRepositoryPrisma implements TicketTypeRepository {
 	async create(data: TicketTypeCreate): Promise<TicketType> {
@@ -76,6 +78,33 @@ class TicketTypeRepositoryPrisma implements TicketTypeRepository {
 				throw new Error("An error occurred when fetching the ticket type.");
 			}
 		}
+	}
+
+	async update(
+		data: TicketTypeUpdate,
+		id: string,
+		user: User
+	): Promise<TicketType> {
+		const { eventId, isActive, quantity, salesEndDate, salesStartDate } = data;
+		const event = await prisma.event.findFirstOrThrow({
+			where: {
+				id: eventId,
+				creatorId: user.id,
+			},
+		});
+
+		return await prisma.ticketType.update({
+			where: {
+				id,
+				eventId: event.id,
+			},
+			data: {
+				isActive: data.isActive,
+				quantity,
+				salesEndDate,
+				salesStartDate,
+			},
+		});
 	}
 }
 

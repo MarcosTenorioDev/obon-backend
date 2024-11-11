@@ -10,11 +10,20 @@ const permissions: Record<string, RoutePermissions> = {
 	"/events": {
 		POST: ["admin", "user"],
 	},
+	"/events/details/:id": {
+		GET: ["admin", "user"],
+	},
+	"/events/:id": {
+		PUT: ["admin", "user"],
+	},
 	"/events/created": {
 		GET: ["admin", "user"],
 	},
 	"/ticketType": {
 		POST: ["admin", "user"],
+	},
+	"/ticketType/:id": {
+		PUT: ["admin", "user"],
 	},
 	"/users": {
 		GET: ["admin", "user"],

@@ -7,8 +7,11 @@ import {
 	EventPreview,
 	EventRepository,
 	EventValidate,
+	IEventDetails,
+	IEventEditPayload,
 	RecentEvents,
 } from "../interfaces/event.interface";
+import { User } from "../interfaces/user.interface";
 class EventRepositoryPrisma implements EventRepository {
 	async create(data: EventCreate): Promise<Event> {
 		try {
@@ -247,6 +250,81 @@ class EventRepositoryPrisma implements EventRepository {
 			});
 		} catch (error) {
 			throw new Error("Unable to get event by id");
+		}
+	}
+
+	async getEventDetailsById(data: {
+		id: string;
+		user: User;
+	}): Promise<IEventDetails> {
+		try {
+			const event = await prisma.event.findUniqueOrThrow({
+				where: {
+					id: data.id,
+					creatorId: data.user.id,
+				},
+				include: {
+					assets: true,
+					ticketTypes: true,
+				},
+			});
+
+			return event;
+		} catch (err) {
+			throw new Error("Unable to get event by id");
+		}
+	}
+
+	async update(data: {
+		payload: IEventEditPayload;
+		id: string;
+		user: User;
+	}): Promise<IEventDetails> {
+		try {
+			const {
+				additionalDetails,
+				addressId,
+				ageRating,
+				capacity,
+				categoryId,
+				description,
+				endDate,
+				format,
+				maxTicketsPerUser,
+				producerId,
+				startDate,
+				status,
+				title,
+			} = data.payload;
+			const event = await prisma.event.update({
+				where: {
+					id: data.id,
+					creatorId: data.user.id,
+				},
+				data: {
+					additionalDetails,
+					addressId,
+					ageRating,
+					capacity,
+					categoryId,
+					description,
+					endDate,
+					format,
+					maxTicketsPerUser,
+					producerId,
+					startDate,
+					status,
+					title,
+				},
+				include: {
+					assets: true,
+					ticketTypes: true,
+				},
+			});
+
+			return event;
+		} catch (err) {
+			throw new Error("Unable to Edit event");
 		}
 	}
 }

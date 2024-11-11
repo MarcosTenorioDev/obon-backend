@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { EventCreate } from "../interfaces/event.interface";
+import { EventCreate, IEventEditPayload } from "../interfaces/event.interface";
 import { User } from "../interfaces/user.interface";
 import { jwtValidator } from "../middlewares/auth.middleware";
 import { EventRepositoryPrisma } from "../repositories/event.repository";
@@ -99,5 +99,34 @@ export async function eventRoutes(fastify: FastifyInstance) {
 		} catch (error) {
 			reply.code(404).send(error);
 		}
+	});
+
+	fastify.get<{ Params: { id: string } }>("/details/:id", {
+		preHandler: [jwtValidator],
+		handler: async (req, reply) => {
+			const { id } = req.params;
+			const user = req.user as User;
+			try {
+				const data = await eventUseCase.getEventDetailsById({ id, user });
+				reply.code(200).send(data);
+			} catch (error) {
+				reply.code(404).send(error);
+			}
+		},
+	});
+
+	fastify.put<{ Params: { id: string }; Body: IEventEditPayload }>("/:id", {
+		preHandler: [jwtValidator],
+		handler: async (req, reply) => {
+			const { id } = req.params;
+			const user = req.user as User;
+			const payload: IEventEditPayload = req.body;
+			try {
+				const data = await eventUseCase.update({ payload, id, user });
+				reply.code(200).send(data);
+			} catch (error) {
+				reply.code(404).send(error);
+			}
+		},
 	});
 }
