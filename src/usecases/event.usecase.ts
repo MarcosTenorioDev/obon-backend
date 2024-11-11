@@ -5,6 +5,7 @@ import {
 	EventRepository,
 	IEventDetails,
 	IEventEditPayload,
+	IEventSearch,
 	RecentEvents,
 } from "../interfaces/event.interface";
 import { User } from "../interfaces/user.interface";
@@ -51,6 +52,13 @@ class EventUseCase {
 
 	async update(data: { payload: IEventEditPayload; id: string; user: User }) {
 		return await this.eventRepository.update(data);
+	}
+
+	async getEventByTitle(data: {
+		title: string;
+		user: User;
+	}): Promise<IEventSearch[]> {
+		return await this.eventRepository.getEventByTitle(data);
 	}
 }
 

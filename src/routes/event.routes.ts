@@ -129,4 +129,18 @@ export async function eventRoutes(fastify: FastifyInstance) {
 			}
 		},
 	});
+
+	fastify.get<{ Params: { title: string } }>("/title/:title", {
+		preHandler: [jwtValidator],
+		handler: async (req, reply) => {
+			const { title } = req.params;
+			const user = req.user as User;
+			try {
+				const data = await eventUseCase.getEventByTitle({ title, user });
+				reply.code(200).send(data);
+			} catch (error) {
+				reply.code(404).send(error);
+			}
+		},
+	});
 }

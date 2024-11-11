@@ -1,4 +1,5 @@
 import { Address } from "./address.interface";
+import { Asset } from "./asset.interface";
 import { TicketType } from "./ticketType.interface";
 import { User } from "./user.interface";
 
@@ -165,6 +166,13 @@ export interface IEventEditPayload {
 	addressId: string;
 }
 
+export interface IEventSearch {
+	id: string;
+	title: string;
+	status: string | null;
+	assets: Asset[];
+}
+
 export interface EventRepository {
 	create(data: EventCreate): Promise<Event>;
 	getEventsByCategory(categoryId: string): Promise<EventPreview[]>;
@@ -178,4 +186,5 @@ export interface EventRepository {
 		id: string;
 		user: User;
 	}): Promise<IEventDetails>;
+	getEventByTitle(data: { title: string; user: User }): Promise<IEventSearch[]>;
 }

@@ -9,6 +9,7 @@ import {
 	EventValidate,
 	IEventDetails,
 	IEventEditPayload,
+	IEventSearch,
 	RecentEvents,
 } from "../interfaces/event.interface";
 import { User } from "../interfaces/user.interface";
@@ -73,6 +74,9 @@ class EventRepositoryPrisma implements EventRepository {
 			return await prisma.event.findMany({
 				where: {
 					categoryId,
+					status: {
+						equals: "Ativo",
+					},
 				},
 				select: {
 					id: true,
@@ -103,6 +107,9 @@ class EventRepositoryPrisma implements EventRepository {
 			const event = await prisma.event.findUniqueOrThrow({
 				where: {
 					id,
+					status: {
+						equals: "Ativo",
+					},
 				},
 				include: {
 					ticketTypes: {
@@ -114,6 +121,11 @@ class EventRepositoryPrisma implements EventRepository {
 							salesStartDate: true,
 							salesEndDate: true,
 							isActive: true,
+						},
+						where: {
+							isActive: {
+								equals: true,
+							},
 						},
 					},
 					assets: {
@@ -215,6 +227,11 @@ class EventRepositoryPrisma implements EventRepository {
 				take: 10,
 				orderBy: {
 					startDate: "desc",
+				},
+				where: {
+					status: {
+						equals: "Ativo",
+					},
 				},
 				select: {
 					id: true,
@@ -325,6 +342,32 @@ class EventRepositoryPrisma implements EventRepository {
 			return event;
 		} catch (err) {
 			throw new Error("Unable to Edit event");
+		}
+	}
+
+	async getEventByTitle(data: {
+		title: string;
+		user: User;
+	}): Promise<IEventSearch[]> {
+		try {
+			const event = await prisma.event.findMany({
+				where: {
+					title: {
+						contains: data.title,
+					},
+					creatorId: data.user.id,
+				},
+				select: {
+					id: true,
+					title: true,
+					status: true,
+					assets: true,
+				},
+			});
+
+			return event;
+		} catch (err) {
+			throw new Error("Unable to get event by id");
 		}
 	}
 }
