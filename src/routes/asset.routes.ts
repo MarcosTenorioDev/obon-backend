@@ -28,46 +28,49 @@ function uploadAssetS3Route(fastify: FastifyInstance) {
 			const { eventId, type, description } = req.body;
 			const user = req.user as User;
 
+			if (!file) {
+				return reply.code(400).send({ error: "File is missing" });
+			}
+
+			const assetData: AssetCreate = {
+				eventId,
+				type,
+				url: "",
+				description: description || null,
+			};
+
 			try {
-				if (!file) {
-					return reply.code(400).send({ error: "File is missing" });
-				}
-
-				const assetData: AssetCreate = {
-					eventId,
-					type,
-					url: "",
-					description: description || null,
-				};
-
 				const data = await uploadAssetUseCase.execute(file, assetData, user);
 				reply.code(201).send(data);
 			} catch (error) {
-				console.error(error);
-				if (error instanceof Error) {
-					if (error.message === "File name is undefined") {
-						return reply.code(400).send({ error: "File name is undefined" });
-					}
-					if (error.message === "Invalid eventId") {
-						return reply
-							.code(400)
-							.send({ error: "Invalid eventId. Event not found." });
-					}
-					if (error.message === "Unable to create asset") {
-						return reply
-							.code(500)
-							.send({ error: "Unable to create asset in the database" });
-					}
-					if (error.message === "File not found") {
-						return reply.code(400).send({ error: "File not found" });
-					}
-					return reply.code(500).send({ error: "Internal Server Error" });
-				} else {
-					return reply.code(500).send({ error: "Unknown error occurred" });
-				}
+				handleError(error, reply);
 			}
 		}
 	);
+
+	// Função auxiliar para tratar os erros
+	function handleError(error: unknown, reply: any) {
+		if (error instanceof Error) {
+			switch (error.message) {
+				case "File name is undefined":
+					return reply.code(400).send({ error: "File name is undefined" });
+				case "Invalid eventId":
+					return reply
+						.code(400)
+						.send({ error: "Invalid eventId. Event not found." });
+				case "Unable to create asset":
+					return reply
+						.code(500)
+						.send({ error: "Unable to create asset in the database" });
+				case "File not found":
+					return reply.code(400).send({ error: "File not found" });
+				default:
+					return reply.code(500).send({ error: "Internal Server Error" });
+			}
+		}
+
+		return reply.code(500).send({ error: "Unknown error occurred" });
+	}
 }
 
 function deleteAssetS3Route(fastify: FastifyInstance) {
