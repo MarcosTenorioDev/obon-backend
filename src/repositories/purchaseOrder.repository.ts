@@ -4,6 +4,7 @@ import {
 	PurchaseOrderInfo,
 	PurchaseOrderRepository,
 	PurchaseOrderReserved,
+	PurchaseOrdersByEvent,
 	ReservedPurchaseOrderUpdate,
 } from "../interfaces/purchaseOrder.interface";
 import { User } from "../interfaces/user.interface";
@@ -390,6 +391,71 @@ class PurchaseOrderRepositoryPrisma implements PurchaseOrderRepository {
 			);
 		} catch (error) {
 			throw new Error(`Error verifying purchase order: ${error}`);
+		}
+	}
+
+	async findByEventId(data: {
+		eventId: string;
+		user: User;
+		itemsPerPage?: number;
+		page?: number;
+	}): Promise<{
+		total: number;
+		purchaseOrders: PurchaseOrdersByEvent[];
+	}> {
+		try {
+			const event = await prisma.event.findUniqueOrThrow({
+				where: {
+					id: data.eventId,
+					creatorId: data.user.id,
+				},
+				select: {
+					id: true,
+					_count: true,
+				},
+			});
+
+			console.log(event);
+
+			const queryOptions: any = {
+				orderBy: [
+					{
+						createdAt: "asc",
+					},
+				],
+				where: {
+					eventId: event.id,
+				},
+				select: {
+					createdAt: true,
+					id: true,
+					user: {
+						select: {
+							firstName: true,
+							lastName: true,
+						},
+					},
+					quantityTickets: true,
+					totalPrice: true,
+					status: true,
+				},
+			};
+
+			// Aplicar filtros apenas de items por página e página estiverem ambos definidos
+			if (data.itemsPerPage && data.page) {
+				queryOptions.take = data.itemsPerPage;
+				queryOptions.skip = (data.page - 1) * data.itemsPerPage;
+			}
+
+			const purchaseOrders: any[] = await prisma.purchaseOrder.findMany(
+				queryOptions
+			);
+			return {
+				total: event._count.purchaseOrders,
+				purchaseOrders,
+			};
+		} catch (error) {
+			throw new Error(`Error finding purchaseOrders: ${error}`);
 		}
 	}
 }

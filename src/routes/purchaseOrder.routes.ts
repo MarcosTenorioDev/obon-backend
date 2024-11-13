@@ -114,4 +114,48 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 			}
 		}
 	);
+
+	fastify.get<{
+		Params: { eventId: string };
+		Querystring: { itemsPerPage?: string; page?: string };
+	}>(
+		"/event/:eventId",
+		{
+			preHandler: [jwtValidator],
+		},
+		async (req, reply) => {
+			const user = req.user as User;
+			const { eventId } = req.params;
+
+			let itemsPerPage =
+				parseInt(req.query.itemsPerPage as any, 10) || undefined;
+			let page = parseInt(req.query.page as any, 10) || undefined;
+
+			// Verificação dos parâmetros
+			if (itemsPerPage && (isNaN(itemsPerPage) || itemsPerPage <= 0)) {
+				itemsPerPage = undefined;
+			}
+			if (page && (isNaN(page) || page <= 0)) {
+				page = undefined;
+			}
+
+			try {
+				const data = await purchaseOrderUseCase.findByEventId({
+					eventId,
+					user,
+					itemsPerPage,
+					page,
+				});
+				reply.code(200).send(data);
+			} catch (error) {
+				console.error(error);
+				reply.code(400).send({
+					error:
+						error instanceof Error
+							? error.message
+							: "An unknown error occurred",
+				});
+			}
+		}
+	);
 }

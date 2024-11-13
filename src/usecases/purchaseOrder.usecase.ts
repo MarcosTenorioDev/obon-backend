@@ -172,6 +172,15 @@ class PurchaseOrderUseCase {
 			eventId
 		);
 	}
+
+	async findByEventId(data: {
+		eventId: string;
+		user: User;
+		itemsPerPage: number | undefined;
+		page: number | undefined;
+	}) {
+		return await this.purchaseOrderRepository.findByEventId(data);
+	}
 }
 
 export { PurchaseOrderUseCase };

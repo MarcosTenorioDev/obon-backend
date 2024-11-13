@@ -105,6 +105,18 @@ export interface PurchaseOrderReserved {
 	};
 }
 
+export interface PurchaseOrdersByEvent {
+	createdAt: Date;
+	id: string;
+	user: {
+		firstName: string;
+		lastName: string;
+	};
+	quantityTickets: number;
+	totalPrice: number;
+	status: string;
+}
+
 export interface PurchaseOrderRepository {
 	create(
 		data: ReservedPurchaseOrderCreate,
@@ -123,4 +135,13 @@ export interface PurchaseOrderRepository {
 		id: string,
 		eventId: string
 	): Promise<{ ticketsPurchased: number }>;
+	findByEventId(data: {
+		eventId: string;
+		user: User;
+		itemsPerPage: number | undefined;
+		page: number | undefined;
+	}): Promise<{
+		total: number;
+		purchaseOrders: PurchaseOrdersByEvent[];
+	}>;
 }

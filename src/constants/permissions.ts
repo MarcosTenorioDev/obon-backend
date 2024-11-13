@@ -41,6 +41,9 @@ const permissions: Record<string, RoutePermissions> = {
 	"/purchaseorders/user/event/:eventId": {
 		GET: ["admin", "user"],
 	},
+	"/purchaseorders/event/:eventId": {
+		GET: ["admin", "user"],
+	},
 	"/purchaseorders/reserved/:id": {
 		GET: ["admin", "user"],
 		PUT: ["admin", "user"],
