@@ -1,7 +1,6 @@
 import Bull, { Job } from "bull";
 import { env } from "../env";
 import { PurchaseOrderUseCase } from "../usecases/purchaseOrder.usecase";
-import { PurchaseOrderRepositoryPrisma } from "../repositories/purchaseOrder.repository";
 
 interface QueueConfig {
 	name: string;
@@ -12,14 +11,14 @@ const queuesConfig: QueueConfig[] = [
 	{
 		name: "purchaseOrder",
 		processJob: async (job) => {
-			const purchaseOrderUseCase = new PurchaseOrderUseCase()
+			const purchaseOrderUseCase = new PurchaseOrderUseCase();
 			console.log("Processing job");
-      		console.log(job.data)
-			const purchaseOrder = await purchaseOrderUseCase.create(job.data)
+			console.log(job.data);
+			const purchaseOrder = await purchaseOrderUseCase.create(job.data);
 
-			if (!purchaseOrder || !purchaseOrder.reservationExpiresAt) {
+			if (!purchaseOrder?.reservationExpiresAt) {
 				throw new Error("Unable to create purchaseOrder");
-			} 
+			}
 
 			// Adiciona um job para verificar após 15 minutos
 			getQueue("verifyPurchaseOrder").add(
