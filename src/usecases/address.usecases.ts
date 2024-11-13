@@ -5,7 +5,7 @@ import {
 } from "../interfaces/address.interface";
 
 class AddressUseCase {
-	constructor(private addressRepository: AddressRepository) {}
+	constructor(private readonly addressRepository: AddressRepository) {}
 
 	async createAddress(address: AddressCreate): Promise<Address> {
 		return this.addressRepository.create(address);

@@ -10,10 +10,10 @@ import { EventRepositoryPrisma } from "../repositories/event.repository";
 import { TicketTypeRepositoryPrisma } from "../repositories/ticketType.repository";
 
 class TicketTypeUseCase {
-	private ticketTypeRepository: TicketTypeRepository =
+	private readonly ticketTypeRepository: TicketTypeRepository =
 		new TicketTypeRepositoryPrisma();
-	private eventRepository: EventRepository = new EventRepositoryPrisma();
-	constructor() {}
+	private readonly eventRepository: EventRepository =
+		new EventRepositoryPrisma();
 
 	async create(data: TicketTypeCreate, user: User): Promise<TicketType> {
 		const event = await this.eventRepository.getEventToValidate(data.eventId);

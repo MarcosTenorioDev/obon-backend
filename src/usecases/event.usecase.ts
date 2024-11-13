@@ -11,7 +11,7 @@ import {
 import { User } from "../interfaces/user.interface";
 
 class EventUseCase {
-	private eventRepository: EventRepository;
+	private readonly eventRepository: EventRepository;
 	constructor(eventRepository: EventRepository) {
 		this.eventRepository = eventRepository;
 	}

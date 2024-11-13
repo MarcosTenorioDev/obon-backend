@@ -12,9 +12,9 @@ import { PurchaseOrderRepositoryPrisma } from "../repositories/purchaseOrder.rep
 import { TicketTypeRepositoryPrisma } from "../repositories/ticketType.repository";
 
 class PurchaseOrderUseCase {
-	private purchaseOrderRepository: PurchaseOrderRepository;
-	private ticketTypeRepository: TicketTypeRepository;
-	private eventRepository: EventRepository;
+	private readonly purchaseOrderRepository: PurchaseOrderRepository;
+	private readonly ticketTypeRepository: TicketTypeRepository;
+	private readonly eventRepository: EventRepository;
 
 	constructor() {
 		this.purchaseOrderRepository = new PurchaseOrderRepositoryPrisma();

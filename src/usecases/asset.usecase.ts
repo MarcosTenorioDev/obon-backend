@@ -5,7 +5,7 @@ import { User } from "../interfaces/user.interface";
 import S3Storage from "../utils/s3.utils";
 
 class UploadAssetUseCase {
-	private assetRepository: AssetRepository;
+	private readonly assetRepository: AssetRepository;
 
 	constructor(assetRepository: AssetRepository) {
 		this.assetRepository = assetRepository;
