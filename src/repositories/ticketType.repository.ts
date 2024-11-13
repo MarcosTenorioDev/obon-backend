@@ -85,7 +85,7 @@ class TicketTypeRepositoryPrisma implements TicketTypeRepository {
 		id: string,
 		user: User
 	): Promise<TicketType> {
-		const { eventId, isActive, quantity, salesEndDate, salesStartDate } = data;
+		const { eventId, quantity, salesEndDate, salesStartDate } = data;
 		const event = await prisma.event.findFirstOrThrow({
 			where: {
 				id: eventId,

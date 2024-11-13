@@ -215,7 +215,7 @@ class PurchaseOrderRepositoryPrisma implements PurchaseOrderRepository {
 
 	async reservePurchaseOrder(data: ReservedPurchaseOrderUpdate): Promise<any> {
 		try {
-			const { user, eventId, ticketTypes, id } = data;
+			const { user, ticketTypes, id } = data;
 
 			return await prisma.$transaction(async (prisma) => {
 				const ticketCreationData: any[] = [];
