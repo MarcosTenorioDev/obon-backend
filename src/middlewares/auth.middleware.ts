@@ -1,8 +1,8 @@
 import { createClerkClient } from "@clerk/fastify";
-import { env } from "../env";
-import { checkPermissions, Method, Role } from "../constants/permissions";
 import jwt from "jsonwebtoken";
 import jwksClient from "jwks-rsa";
+import { checkPermissions, Role } from "../constants/permissions";
+import { env } from "../env";
 import { UserRepositoryPrisma } from "../repositories/user.repository";
 
 export async function jwtValidator(req: any, reply: any) {
@@ -34,7 +34,7 @@ export async function jwtValidator(req: any, reply: any) {
 		const decodedToken: any = await new Promise((resolve, reject) => {
 			jwt.verify(token, getKey, { algorithms: ["RS256"] }, (err, decoded) => {
 				if (err) {
-					reject(err);
+					reject(err instanceof Error ? err : new Error(err));
 				} else {
 					resolve(decoded);
 				}
@@ -53,14 +53,17 @@ export async function jwtValidator(req: any, reply: any) {
 			return false;
 		}
 
-		const allowedRoles = checkPermissions(req.context.config.url, req.context.config.method);
+		const allowedRoles = checkPermissions(
+			req.context.config.url,
+			req.context.config.method
+		);
 
 		if (!allowedRoles) {
 			reply.code(403).send({ error: "Forbidden: Operation denied" });
 			return false;
 		}
 		//Verify user permission to acess route
-		const role = clerkUser.privateMetadata.role as Role
+		const role = clerkUser.privateMetadata.role as Role;
 		if (!allowedRoles.includes(role)) {
 			reply.code(403).send({ error: "Forbidden" });
 			return false;
@@ -69,8 +72,8 @@ export async function jwtValidator(req: any, reply: any) {
 		const user = await new UserRepositoryPrisma().findUserByExternalOrId(
 			externalId
 		);
-		if(!user){
-			throw new Error("User not found")
+		if (!user) {
+			throw new Error("User not found");
 		}
 
 		req.user = user;
