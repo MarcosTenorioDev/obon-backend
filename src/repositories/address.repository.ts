@@ -34,6 +34,13 @@ class AddressRepositoryPrisma implements AddressRepository {
 			throw new Error("Unable to find address by id");
 		}
 	}
+
+	async getUniqueCities(): Promise<{ city: string }[]> {
+		return await prisma.address.findMany({
+			select: { city: true },
+			distinct: ["city"],
+		});
+	}
 }
 
 export { AddressRepositoryPrisma };

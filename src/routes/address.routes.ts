@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
-import { AddressRepositoryPrisma } from "../repositories/address.repository";
-import { AddressUseCase } from "../usecases/address.usecases";
 import { AddressCreate } from "../interfaces/address.interface";
 import { jwtValidator } from "../middlewares/auth.middleware";
+import { AddressRepositoryPrisma } from "../repositories/address.repository";
+import { AddressUseCase } from "../usecases/address.usecases";
 
 const addressRepository = new AddressRepositoryPrisma();
 const addressUseCase = new AddressUseCase(addressRepository);
@@ -10,6 +10,7 @@ const addressUseCase = new AddressUseCase(addressRepository);
 export async function addressRoutes(fastify: FastifyInstance) {
 	registerAddressRoute(fastify);
 	getAddressById(fastify);
+	getCities(fastify);
 }
 
 function registerAddressRoute(fastify: FastifyInstance) {
@@ -42,6 +43,17 @@ function getAddressById(fastify: FastifyInstance) {
 		const { id } = req.params;
 		try {
 			const data = await addressUseCase.getAddressById(id);
+			reply.code(200).send(data);
+		} catch (error) {
+			reply.code(404).send(error);
+		}
+	});
+}
+
+function getCities(fastify: FastifyInstance) {
+	fastify.get("/cities", async (req, reply) => {
+		try {
+			const data = await addressUseCase.getUniqueCities();
 			reply.code(200).send(data);
 		} catch (error) {
 			reply.code(404).send(error);

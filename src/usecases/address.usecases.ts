@@ -18,6 +18,10 @@ class AddressUseCase {
 		}
 		return existingAddress;
 	}
+
+	async getUniqueCities(): Promise<{ city: string }[]> {
+		return await this.addressRepository.getUniqueCities();
+	}
 }
 
 export { AddressUseCase };
