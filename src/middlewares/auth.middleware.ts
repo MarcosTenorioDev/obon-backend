@@ -7,14 +7,31 @@ import { UserRepositoryPrisma } from "../repositories/user.repository";
 
 export async function jwtValidator(req: any, reply: any) {
 	try {
+		// Log para verificar o cabeçalho Authorization
+		console.log("Authorization Header:", req.headers["authorization"]);
+
+		// Obtém o token do cabeçalho Authorization
+		const authorizationHeader = req.headers["authorization"];
+		if (!authorizationHeader) {
+			reply.code(401).send({ error: "Authorization header is missing" });
+			return;
+		}
+
+		// Verifica o formato do cabeçalho
+		const token = authorizationHeader.split(" ")[1];
+		if (!token) {
+			reply.code(401).send({ error: "Authorization token is required" });
+			return;
+		}
+
+		// Inicializa o cliente Clerk
 		const clerkClient = createClerkClient({
 			secretKey: env.CLERK_API_KEY,
 			publishableKey: env.CLERK_PUBLISHABLE_KEY,
 		});
 
-		const token = req.headers["authorization"];
+		// Configuração do JWKS para validação do token
 		const jwtUri = env.JWT_PUBLIC_KEY!;
-
 		const jwksClientInstance = jwksClient({
 			jwksUri: jwtUri,
 		});
@@ -30,7 +47,7 @@ export async function jwtValidator(req: any, reply: any) {
 			});
 		};
 
-		//Verify token validity
+		// Valida o token recebido
 		const decodedToken: any = await new Promise((resolve, reject) => {
 			jwt.verify(token, getKey, { algorithms: ["RS256"] }, (err, decoded) => {
 				if (err) {
@@ -41,44 +58,40 @@ export async function jwtValidator(req: any, reply: any) {
 			});
 		});
 
-		const externalId = decodedToken.sub;
+		// Obtém um novo token usando o template `tokenDev`
+		const newToken = await clerkClient.sessions.getToken({
+			template: "tokenDev",
+		});
 
-		//Verify if clerk user exists
-		const clerkUser = externalId
-			? await clerkClient.users.getUser(externalId)
-			: null;
+		if (!newToken) {
+			reply.code(401).send({ error: "Failed to retrieve token from Clerk" });
+			return;
+		}
+
+		// Valida o novo token
+		const verifiedNewToken: any = await new Promise((resolve, reject) => {
+			jwt.verify(newToken, getKey, { algorithms: ["RS256"] }, (err, decoded) => {
+				if (err) {
+					reject(err instanceof Error ? err : new Error(err));
+				} else {
+					resolve(decoded);
+				}
+			});
+		});
+
+		// Lógica adicional
+		const externalId = decodedToken.sub;
+		const clerkUser = await clerkClient.users.getUser(externalId);
 
 		if (!clerkUser) {
 			reply.code(401).send({ error: "Unauthorized" });
-			return false;
+			return;
 		}
 
-		const allowedRoles = checkPermissions(
-			req.context.config.url,
-			req.context.config.method
-		);
-
-		if (!allowedRoles) {
-			reply.code(403).send({ error: "Forbidden: Operation denied" });
-			return false;
-		}
-		//Verify user permission to acess route
-		const role = clerkUser.privateMetadata.role as Role;
-		if (!allowedRoles.includes(role)) {
-			reply.code(403).send({ error: "Forbidden" });
-			return false;
-		}
-		//Verify if user exists in database
-		const user = await new UserRepositoryPrisma().findUserByExternalOrId(
-			externalId
-		);
-		if (!user) {
-			throw new Error("User not found");
-		}
-
-		req.user = user;
+		// Adiciona o usuário ao request
+		req.user = clerkUser;
 	} catch (error: any) {
 		console.error("JWT Verification Error:", error.message);
-		throw new Error(error.message);
+		reply.code(401).send({ error: error.message });
 	}
 }
