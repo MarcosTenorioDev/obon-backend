@@ -82,7 +82,6 @@ class PurchaseOrderUseCase {
 				"Maximum quantity per user exceeded when purchasing tickets"
 			);
 		}
-
 		//Validar se a quantidade requisitada pelo usuário está disponível
 		ticketTypes.forEach((ticketType) => {
 			if (ticketType.quantity < ticketType.requestedCount) {

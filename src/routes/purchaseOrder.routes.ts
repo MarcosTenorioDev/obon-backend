@@ -11,6 +11,13 @@ import { PurchaseOrderUseCase } from "../usecases/purchaseOrder.usecase";
 export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 	createQueues();
 	const purchaseOrderUseCase = new PurchaseOrderUseCase();
+
+	const getFormattedDate = () => {
+		const now = new Date();
+		return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}.${String(now.getMilliseconds()).padStart(3, "0")}`;
+	};
+
+
 	fastify.post<{ Body: PurchaseOrderReserved }>("/", {
 		preHandler: [jwtValidator],
 		handler: async (req, reply) => {
@@ -28,6 +35,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 						error instanceof Error
 							? error.message
 							: "An unknown error occurred",
+							dateTime: getFormattedDate(),
 				});
 			}
 		},
@@ -51,6 +59,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 						error instanceof Error
 							? error.message
 							: "An unknown error occurred",
+							dateTime: getFormattedDate(),
 				});
 			}
 		}
@@ -83,6 +92,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 						error instanceof Error
 							? error.message
 							: "An unknown error occurred",
+							dateTime: getFormattedDate(),
 				});
 			}
 		}
@@ -110,6 +120,7 @@ export async function purchaseOrderRoutes(fastify: FastifyInstance) {
 						error instanceof Error
 							? error.message
 							: "An unknown error occurred",
+							dateTime: getFormattedDate(),
 				});
 			}
 		}
