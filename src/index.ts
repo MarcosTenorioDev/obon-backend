@@ -21,7 +21,8 @@ const port = parseInt(env.PORT as string);
 app.register(cors, {
     origin: [
         'http://localhost:5173',
-        'https://obon.vercel.app'
+        'https://obon.vercel.app',
+        'https://vite-react-template-production-9cde.up.railway.app'
     ]
 });
 
