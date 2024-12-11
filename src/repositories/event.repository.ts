@@ -391,6 +391,9 @@ class EventRepositoryPrisma implements EventRepository {
 			...(cities && cities.length > 0
 			  ? { Address: { city: { in: cities } } }
 			  : {}),
+        status: {
+          equals: "Ativo",
+        },
 		  },
 		select: {
 		  id: true,
