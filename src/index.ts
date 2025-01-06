@@ -64,6 +64,8 @@ app.register(userRoutes, { prefix: '/users' });
 app.register(webhookClerk, { prefix: '/clerk'});
 app.register(addressRoutes, { prefix: '/address'})
 
+app.log.info(`Starting server on port: ${port}, typeof port: ${typeof port}`);
+
 app.listen({ port: port || 3000, host: '0.0.0.0' }, function (err, address) {
     if (err) {
         app.log.error(err);
